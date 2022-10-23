@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  socketUrl: '',
+  socketUrl: 'ws://localhost:3000',
 };
 
 /*
