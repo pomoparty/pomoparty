@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription, timer } from 'rxjs';
+import { WebsocketService } from '../websocket.service';
 
 @Component({
   selector: 'app-main-box',
   templateUrl: './main-box.component.html',
-  styleUrls: ['./main-box.component.scss']
+  styleUrls: ['./main-box.component.scss'],
+  providers: [WebsocketService]
 })
 export class MainBoxComponent implements OnInit {
 
@@ -16,7 +18,7 @@ export class MainBoxComponent implements OnInit {
   timeLeft: number;
 
   pauseTime: number;
-  constructor() { }
+  constructor(private websocketService: WebsocketService) {}
 
   ngOnInit(): void {
     this.timerSub = timer(0, 1000).subscribe(() => {
@@ -30,12 +32,13 @@ export class MainBoxComponent implements OnInit {
   }
 
   startTimer(){
-    if(this.isPaused){
-      this.endTime += Date.now() - this.pauseTime;
-      this.isPaused = false;
-    }else{
-      this.endTime = Date.now() + this.interval;
-    }
+    // if(this.isPaused){
+    //   this.endTime += Date.now() - this.pauseTime;
+    //   this.isPaused = false;
+    // }else{
+    //   this.endTime = Date.now() + this.interval;
+    // }
+    this.websocketService.startTimer()
   }
 
   stopTimer(){
