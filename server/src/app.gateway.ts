@@ -1,10 +1,15 @@
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WsResponse } from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WsResponse, WebSocketServer } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: true,
+})
 export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   
   private logger: Logger = new Logger('AppGateway'); 
+
+  @WebSocketServer()
+  private server: Server;
   
   afterInit(server: Server) {
     this.logger.log('Initialized');
