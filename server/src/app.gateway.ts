@@ -78,11 +78,12 @@ export class AppGateway
       );
       let interval = setInterval(() => {
         const paused = this.activeTimers[room].paused;
+        const endMillis = this.activeTimers[room].endMillis;
         if (!paused) {
           const currMillis = Date.now();
-          this.server.to(room).emit('updateTimer', endTimeMillis - currMillis);
+          this.server.to(room).emit('updateTimer', endMillis - currMillis);
           this.activeTimers[room].currMillis = currMillis;
-          if (endTimeMillis - currMillis <= 0) {
+          if (endMillis - currMillis <= 0) {
             this.logger.log('timer stopped');
             clearInterval(this.activeTimers[room].interval);
             delete this.activeTimers[room];
