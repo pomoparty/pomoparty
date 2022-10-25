@@ -4,11 +4,19 @@ import {
   OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
-  WsResponse,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
+
+type Timer = {
+  [key: string]: {
+    interval: NodeJS.Timer;
+    currMillis: number;
+    endMillis: number;
+    paused: boolean;
+  };
+};
 
 @WebSocketGateway({
   cors: true,
@@ -18,9 +26,7 @@ export class AppGateway
 {
   private logger: Logger = new Logger('AppGateway');
 
-  private activeTimers: {
-    [key: string]: NodeJS.Timer;
-  } = {};
+  private activeTimers: Timer = {};
 
   @WebSocketServer()
   private server: Server;
@@ -31,18 +37,27 @@ export class AppGateway
   handleConnection(client: Socket, ...args: any[]) {
     this.logger.log(`Client connected: ${client.id}`);
   }
+
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
   @SubscribeMessage('joinRoom')
-  handleJoinRoom(client: Socket, room: string): WsResponse<string> {
+  handleJoinRoom(client: Socket, room: string) {
     client.join(room);
-    return { event: 'joinRoom', data: room };
+    if (Object.prototype.hasOwnProperty.call(this.activeTimers, room)) {
+      client.emit(
+        'startTimer',
+        this.activeTimers[room].endMillis - this.activeTimers[room].currMillis,
+      );
+    }
   }
 
   @SubscribeMessage('startTimer')
   handleMessage(client: Socket, durationMillis: number) {
+    // Cast number to number because postman still sends payload as string
+    durationMillis = Number(durationMillis);
+
     this.logger.log('startTimer Received');
     if (client.rooms.size != 2) {
       client.emit('error', 'rooms');
@@ -53,23 +68,67 @@ export class AppGateway
     }
     const startTimeMillis: number = Date.now();
 
-    // Cast number to number because postman still sends payload as string
-    const endTimeMillis: number = startTimeMillis + Number(durationMillis);
+    const endTimeMillis: number = startTimeMillis + durationMillis;
     for (let room of client.rooms) {
       if (room == client.id) continue;
       this.logger.log(room);
-      this.server.to(room).emit('startTimer', endTimeMillis);
+      this.server.to(room).emit('startTimer', durationMillis);
       this.logger.log(
         `${client.id} has started the timer in ${room} for ${durationMillis} milliseconds`,
       );
       let interval = setInterval(() => {
-        this.server.to(room).emit('updateTimer', endTimeMillis - Date.now());
-        if (endTimeMillis - Date.now() <= 0) {
-          this.logger.log('timer stopped');
-          clearInterval(this.activeTimers[room]);
+        const paused = this.activeTimers[room].paused;
+        if (!paused) {
+          const currMillis = Date.now();
+          this.server.to(room).emit('updateTimer', endTimeMillis - currMillis);
+          this.activeTimers[room].currMillis = currMillis;
+          if (endTimeMillis - currMillis <= 0) {
+            this.logger.log('timer stopped');
+            clearInterval(this.activeTimers[room].interval);
+            delete this.activeTimers[room];
+          }
         }
-      }, 1000); // tick every second
-      this.activeTimers[room] = interval;
+      }, 10); // tick every 100th of a second
+      this.activeTimers[room] = {
+        interval: interval,
+        currMillis: startTimeMillis,
+        endMillis: endTimeMillis,
+        paused: false,
+      };
+    }
+  }
+
+  @SubscribeMessage('pauseTimer')
+  handlePauseTimer(client: Socket) {
+    if (client.rooms.size != 2) {
+      client.emit('error', 'rooms');
+      this.logger.log(
+        `${client.id} must be in exactly one room excluding itself`,
+      );
+      return;
+    }
+    for (let room of client.rooms) {
+      if (room == client.id) continue;
+      this.activeTimers[room].paused = true;
+    }
+  }
+  @SubscribeMessage('resumeTimer')
+  handleResumeTimer(client: Socket) {
+    if (client.rooms.size != 2) {
+      client.emit('error', 'rooms');
+      this.logger.log(
+        `${client.id} must be in exactly one room excluding itself`,
+      );
+      return;
+    }
+    const currMillis = Date.now();
+    for (let room of client.rooms) {
+      if (room == client.id) continue;
+      const diffMillis =
+        this.activeTimers[room].endMillis - this.activeTimers[room].currMillis;
+      this.activeTimers[room].currMillis = currMillis;
+      this.activeTimers[room].endMillis = currMillis + diffMillis;
+      this.activeTimers[room].paused = false;
     }
   }
 }
