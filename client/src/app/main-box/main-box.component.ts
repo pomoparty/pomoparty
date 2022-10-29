@@ -31,7 +31,7 @@ export class MainBoxComponent implements OnInit {
     this.websocketService.pausedStream.subscribe((paused) => {
       this.paused = paused;
     });
-    this.websocketService.updateTimerStream().subscribe((newTimeLeft) => {
+    this.websocketService.updateTimerStream.subscribe((newTimeLeft) => {
       this.timeLeft = Math.max(newTimeLeft, 0);
     });
   }
@@ -43,9 +43,8 @@ export class MainBoxComponent implements OnInit {
   }
 
   resetTimer() {
-    this.timeLeft = 25000;
     if (this.started) {
-      this.websocketService.stopTimer();
+      this.websocketService.stopTimer(25000);
     }
   }
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
-import { Observable, Subscriber } from 'rxjs';
+import { combineLatest, map, max, Observable, Subscriber } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
@@ -25,6 +25,16 @@ export class WebsocketService {
       });
     }
   );
+  updateTimerStream: Observable<number> = new Observable(
+    (subscriber: Subscriber<number>) => {
+      this.socket.on('updateTimer', (newTime) => {
+        subscriber.next(newTime);
+      });
+      this.socket.on('startTimer', (newTime) => {
+        subscriber.next(newTime);
+      });
+    }
+  );
   constructor(private socket: Socket) {
     this.socket.on('startTimer', (payload: string) => {
       console.log(`Received: ${payload}`);
@@ -41,16 +51,13 @@ export class WebsocketService {
   startTimer(durationMillis: number) {
     this.socket.emit('startTimer', durationMillis);
   }
-  stopTimer() {
-    this.socket.emit('stopTimer');
+  stopTimer(durationMillis: number) {
+    this.socket.emit('stopTimer', durationMillis);
   }
   pauseTimer() {
     this.socket.emit('pauseTimer');
   }
   resumeTimer() {
     this.socket.emit('resumeTimer');
-  }
-  updateTimerStream() {
-    return this.socket.fromEvent<number>('updateTimer');
   }
 }

@@ -51,6 +51,11 @@ export class AppGateway
         'startTimer',
         this.activeTimers[room].endMillis - this.activeTimers[room].currMillis,
       );
+      if (this.activeTimers[room].paused) {
+        client.emit('pauseTimer');
+      } else {
+        client.emit('resumeTimer');
+      }
     }
   }
 
@@ -108,7 +113,8 @@ export class AppGateway
   }
 
   @SubscribeMessage('stopTimer')
-  handleStopTimer(client: Socket) {
+  handleStopTimer(client: Socket, durationMillis: number) {
+    durationMillis = Number(durationMillis);
     if (client.rooms.size != 2) {
       client.emit('error', 'rooms');
       this.logger.log(
@@ -118,7 +124,10 @@ export class AppGateway
     }
     for (let room of client.rooms) {
       if (room == client.id) continue;
+      this.logger.log(durationMillis);
       this.server.to(room).emit('stopTimer');
+      this.server.to(room).emit('updateTimer', durationMillis);
+      this.server.to(room).emit('resumeTimer');
       clearInterval(this.activeTimers[room].interval);
       delete this.activeTimers[room];
     }
