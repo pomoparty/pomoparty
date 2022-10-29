@@ -2,16 +2,16 @@ import { Injectable } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WebsocketService {
   constructor(private socket: Socket) {
     this.socket.on('startTimer', (payload: string) => {
-      console.log(`Received: ${payload}`)
-    })
+      console.log(`Received: ${payload}`);
+    });
   }
 
-  startTimer(){
+  startTimer() {
     this.socket.emit('startTimer');
   }
 }
