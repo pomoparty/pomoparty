@@ -1,6 +1,23 @@
 <div class="main-box">
   <app-slider></app-slider>
-  <p>{{ timeLeft }}</p>
-  <button (click)="startTimer()">Start</button>
-  <button (click)="stopTimer()">Stop</button>
+  <h1>{{ roomCode }}</h1>
+  <p>{{ secondsToMilliseconds(timeLeft) }}</p>
+  <div *ngIf="!started; then idle; else timerStarted"></div>
+  <ng-template #idle>
+    <button (click)="startTimer()">Start</button>
+    <button (click)="resetTimer()">Reset</button>
+    <input
+      type="text"
+      [(ngModel)]="newCode"
+      (keyup)="keyUpEvent($event.target.value)"
+      (keypress)="handleRoomSubmit($event)"
+    />
+  </ng-template>
+  <ng-template #timerStarted>
+    <button *ngIf="!paused; else resume" (click)="pauseTimer()">Pause</button>
+    <ng-template #resume>
+      <button (click)="resumeTimer()">Resume</button>
+      <button (click)="resetTimer()">reset</button>
+    </ng-template>
+  </ng-template>
 </div>

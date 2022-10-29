@@ -6,20 +6,18 @@ import { AppComponent } from './app.component';
 import { MainBoxComponent } from './main-box/main-box.component';
 import { SliderComponent } from './main-box/slider/slider.component';
 import { environment } from 'src/environments/environment';
+import { HttpClientModule } from '@angular/common/http';
 
 const config: SocketIoConfig = { url: environment.socketUrl, options: {} };
 @NgModule({
-  declarations: [
-    AppComponent,
-    MainBoxComponent,
-    SliderComponent,
-  ],
+  declarations: [AppComponent, MainBoxComponent, SliderComponent],
   imports: [
     BrowserModule,
+    HttpClientModule,
     AppRoutingModule,
     SocketIoModule.forRoot(config),
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

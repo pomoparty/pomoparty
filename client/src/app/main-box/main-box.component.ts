@@ -1,57 +1,78 @@
 import { Component, OnInit } from '@angular/core';
-import { Subscription, timer } from 'rxjs';
+import { ApiService } from '../api.service';
 import { WebsocketService } from '../websocket.service';
 
 @Component({
   selector: 'app-main-box',
   templateUrl: './main-box.component.html',
   styleUrls: ['./main-box.component.scss'],
-  providers: [WebsocketService]
+  providers: [WebsocketService, ApiService],
 })
 export class MainBoxComponent implements OnInit {
+  roomCode: string;
+  newCode: string = '';
+  timeLeft: number = 25000;
+  started: boolean = false;
+  paused: boolean = false;
 
-  endTime: number = 0;
-  interval: number = 25000;
-  isPaused: boolean = false;
-
-  timerSub: Subscription;
-  timeLeft: number;
-
-  pauseTime: number;
-  constructor(private websocketService: WebsocketService) {}
+  constructor(
+    private websocketService: WebsocketService,
+    private apiService: ApiService
+  ) {}
 
   ngOnInit(): void {
-    this.timerSub = timer(0, 1000).subscribe(() => {
-      if (!this.isPaused) this.updateTimeLeft()
+    this.apiService.getCode().subscribe((code: string) => {
+      this.roomCode = code;
+      this.websocketService.joinRoom(code);
+    });
+    this.websocketService.startedStream.subscribe((started) => {
+      this.started = started;
+    });
+    this.websocketService.pausedStream.subscribe((paused) => {
+      this.paused = paused;
+    });
+    this.websocketService.updateTimerStream().subscribe((newTimeLeft) => {
+      this.timeLeft = Math.max(newTimeLeft, 0);
     });
   }
 
-  ngOnDestroy(): void{
-    this.timerSub.unsubscribe();
-    this.timerSub = null;
+  ngOnDestroy(): void {}
+
+  startTimer() {
+    this.websocketService.startTimer(this.timeLeft);
   }
 
-  startTimer(){
-    // if(this.isPaused){
-    //   this.endTime += Date.now() - this.pauseTime;
-    //   this.isPaused = false;
-    // }else{
-    //   this.endTime = Date.now() + this.interval;
-    // }
-    this.websocketService.startTimer()
-  }
-
-  stopTimer(){
-    if (!this.isPaused && this.endTime - Date.now() >= 0){
-      this.isPaused = true;
-      this.pauseTime = Date.now();
+  resetTimer() {
+    this.timeLeft = 25000;
+    if (this.started) {
+      this.websocketService.stopTimer();
     }
   }
 
-  updateTimeLeft(){
-    const temp: number = Math.round((this.endTime - Date.now())/1000);
-
-    this.timeLeft = (temp <= 0) ? 25 : temp; 
+  pauseTimer() {
+    this.websocketService.pauseTimer();
   }
 
+  resumeTimer() {
+    this.websocketService.resumeTimer();
+  }
+
+  secondsToMilliseconds(seconds: number) {
+    return seconds / 1000;
+  }
+
+  keyUpEvent(value: string) {
+    this.newCode = value;
+  }
+
+  handleRoomSubmit(event: KeyboardEvent) {
+    if (event.keyCode === 13) {
+      event.preventDefault();
+      if (this.roomCode != null && this.roomCode != '') {
+        this.websocketService.leaveRoom(this.roomCode);
+      }
+      this.roomCode = this.newCode;
+      this.websocketService.joinRoom(this.newCode);
+    }
+  }
 }
