@@ -44,6 +44,7 @@ export class AppGateway
 
   @SubscribeMessage('joinRoom')
   handleJoinRoom(client: Socket, room: string) {
+    this.logger.log(`${client.id} is joining ${room}`);
     client.join(room);
     if (Object.prototype.hasOwnProperty.call(this.activeTimers, room)) {
       client.emit(
@@ -51,6 +52,12 @@ export class AppGateway
         this.activeTimers[room].endMillis - this.activeTimers[room].currMillis,
       );
     }
+  }
+
+  @SubscribeMessage('leaveRoom')
+  handleLeaveRoom(client: Socket, room: string) {
+    this.logger.log(`${client.id} is leaving ${room}`);
+    client.leave(room);
   }
 
   @SubscribeMessage('startTimer')
@@ -85,6 +92,7 @@ export class AppGateway
           this.activeTimers[room].currMillis = currMillis;
           if (endMillis - currMillis <= 0) {
             this.logger.log('timer stopped');
+            this.server.to(room).emit('stopTimer');
             clearInterval(this.activeTimers[room].interval);
             delete this.activeTimers[room];
           }
@@ -99,6 +107,23 @@ export class AppGateway
     }
   }
 
+  @SubscribeMessage('stopTimer')
+  handleStopTimer(client: Socket) {
+    if (client.rooms.size != 2) {
+      client.emit('error', 'rooms');
+      this.logger.log(
+        `${client.id} must be in exactly one room excluding itself`,
+      );
+      return;
+    }
+    for (let room of client.rooms) {
+      if (room == client.id) continue;
+      this.server.to(room).emit('stopTimer');
+      clearInterval(this.activeTimers[room].interval);
+      delete this.activeTimers[room];
+    }
+  }
+
   @SubscribeMessage('pauseTimer')
   handlePauseTimer(client: Socket) {
     if (client.rooms.size != 2) {
@@ -110,6 +135,7 @@ export class AppGateway
     }
     for (let room of client.rooms) {
       if (room == client.id) continue;
+      this.server.to(room).emit('pauseTimer');
       this.activeTimers[room].paused = true;
     }
   }
@@ -125,6 +151,7 @@ export class AppGateway
     const currMillis = Date.now();
     for (let room of client.rooms) {
       if (room == client.id) continue;
+      this.server.to(room).emit('resumeTimer');
       const diffMillis =
         this.activeTimers[room].endMillis - this.activeTimers[room].currMillis;
       this.activeTimers[room].currMillis = currMillis;
