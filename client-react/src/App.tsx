@@ -1,10 +1,15 @@
-import './App.css'
+import { Outlet } from "react-router-dom"
+import "./App.scss";
+import { Topbar } from "./components/Topbar/Topbar";
 
 function App() {
   return (
-    <>
-      <h1> Pomoparty </h1>
-    </>
+    <div className="app-container">
+      <Topbar />
+      <section>
+        <Outlet />
+      </section>
+    </div>
   )
 }
 

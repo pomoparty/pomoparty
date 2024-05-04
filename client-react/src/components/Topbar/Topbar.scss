@@ -1,0 +1,25 @@
+nav {
+  padding: 20px;
+  background: #263546;
+  
+  display: flex;
+  justify-content: space-between;
+
+  .links {
+    display: flex;
+    gap: 30px;
+  }
+}
+
+a {
+  color: white;
+  margin: 0;
+  text-decoration: none;
+
+  display: flex;
+  align-items: center;
+}
+
+a:hover {
+  text-decoration: underline;
+}
