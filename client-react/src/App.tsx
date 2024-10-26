@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { io, Socket } from "socket.io-client";
-import "./App.css";
+import { Outlet } from "react-router-dom";
+import "./App.scss";
+import { Topbar } from "./components/Topbar/Topbar";
 
 function App() {
   const [socket, setSocket] = useState<Socket>();
@@ -17,10 +18,12 @@ function App() {
     };
   }, []);
   return (
-    <>
-      <h1> Pomoparty </h1>
-      <button onClick={() => socket?.emit("yert")}>hi</button>
-    </>
+    <div className="app-container">
+      <Topbar />
+      <section>
+        <Outlet />
+      </section>
+    </div>
   );
 }
 
