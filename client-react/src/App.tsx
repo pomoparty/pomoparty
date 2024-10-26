@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
+import { io, Socket } from "socket.io-client";
 import "./App.scss";
 import { Topbar } from "./components/Topbar/Topbar";
 
