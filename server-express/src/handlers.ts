@@ -37,11 +37,11 @@ export const handlers = (socket: Socket, io: any) => {
     socket.join(room);
   });
 
-  socket.on("start-timer", () => {
+  socket.on("start-timer", (time: number) => {
     console.log('start-timer Received');
     if (socket.rooms.size != 2) {
       socket.emit('error', 'rooms');
-      console.log(`${socket.id} must be in exactly one room excluding itself`);
+      console.log(`${socket.id} must be in exactly one room excluding itself. Got ${socket.rooms.size}`);
       return;
     }
 
@@ -49,7 +49,7 @@ export const handlers = (socket: Socket, io: any) => {
       if (room == socket.id) continue;
       if (activeTimers[room].state.running) continue;
 
-      socket.broadcast.to(room).emit('start-timer');
+      socket.broadcast.to(room).emit('start-timer', time);
       console.log(`${socket.id} has started the timer in ${room}`);
       activeTimers[room].state.running = true;
     }
