@@ -8,6 +8,10 @@ import { formatTime } from "./util";
 function App() {
   const [socket, setSocket] = useState<Socket>();
 
+  const [timer, setTimer] = useState<number>();
+  const [startTime, setStartTime] = useState<number>();
+  const [running, setRunning] = useState<boolean>(false);
+
   useEffect(() => {
     const sock = io("http://localhost:3000");
     setSocket(sock);
@@ -32,10 +36,6 @@ function App() {
       sock.disconnect();
     };
   }, []);
-
-  const [timer, setTimer] = useState<number>();
-  const [startTime, setStartTime] = useState<number>();
-  const [running, setRunning] = useState<boolean>(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
