@@ -20,7 +20,6 @@ function App() {
     });
     sock.on("start-timer", (time) => {
       console.log("received start-timer");
-      console.log(time);
       setStartTime(time);
       setRunning(true);
     });
