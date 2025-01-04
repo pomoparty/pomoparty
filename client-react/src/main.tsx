@@ -6,6 +6,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { Dashboard } from './views/Dashboard/Dashboard';
 import { Join } from './views/Join/Join.tsx';
 import { Create } from './views/Create/Create.tsx';
+import { TimerProvider } from './contexts/TimerContext.tsx';
 
 const router = createBrowserRouter([
   {
@@ -31,6 +32,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <TimerProvider>
+      <RouterProvider router={router} />
+    </TimerProvider>
   </React.StrictMode>,
 )
