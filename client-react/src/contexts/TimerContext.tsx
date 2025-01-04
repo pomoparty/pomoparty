@@ -13,7 +13,7 @@ const TimerContext = createContext<TimerContextValue | undefined>(undefined);
 export const useTimer = () => {
   const context = useContext(TimerContext);
   if (!context) {
-    throw new Error('useSocket must be used within a SocketProvider');
+    throw new Error('useTimer must be used within a TimerProvider');
   }
   return context;
 }
