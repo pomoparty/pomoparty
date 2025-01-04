@@ -28,6 +28,7 @@ export const TimerProvider = ({ children}: { children: ReactNode }) => {
     const sock = io("http://localhost:3000");
     setSocket(sock);
 
+    // TODO: Remove console.log on events
     sock.on("create", (_) => {
       console.log("received create");
     });
