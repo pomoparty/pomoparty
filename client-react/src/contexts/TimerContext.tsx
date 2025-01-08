@@ -25,7 +25,7 @@ export const TimerProvider = ({ children}: { children: ReactNode }) => {
   const [socket, setSocket] = useState<Socket>();
 
   useEffect(() => {
-    const sock = io("http://localhost:3000");
+    const sock = io("http://localhost:3000"); // TODO: move to env variable
     setSocket(sock);
 
     // TODO: Remove console.log on events
@@ -57,7 +57,7 @@ export const TimerProvider = ({ children}: { children: ReactNode }) => {
     }, 100);
 
     return () => clearInterval(interval);
-  });
+  }, []);
 
   const startTimer = () => {
     setStartTime(Date.now());
