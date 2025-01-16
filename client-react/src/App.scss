@@ -7,17 +7,8 @@
   display: flex;
   flex-direction: column;
 
-  h1 {
-    margin: 0;
-  }
-
-  section {
-    flex-grow: 1;
+  .outlet-wrapper {
+    display: flex;
     height: 100%;
   }
-}
-
-.timer {
-  text-align: center;
-  font-size: 70px;
 }

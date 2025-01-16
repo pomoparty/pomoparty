@@ -1,7 +1,7 @@
 export const Create = () => {
   return (
     <div className="container">
-      <h1> Create Party </h1>
+      <h1> New Party </h1>
     </div>
   );
 }
