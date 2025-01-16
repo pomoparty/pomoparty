@@ -18,6 +18,7 @@ export const Join = () => {
 
     if (code.length != 4) {
       setCodeError("Must be 4 letters");
+      return;
     }
 
     navigate('/dashboard');
