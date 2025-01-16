@@ -6,6 +6,8 @@ interface TimerContextValue {
     socket: Socket | undefined;
     startTimer: () => void;
     stopTimer: () => void;
+    toggleTimer: () => void;
+    running: boolean;
 }
 
 const TimerContext = createContext<TimerContextValue | undefined>(undefined);
@@ -57,7 +59,7 @@ export const TimerProvider = ({ children}: { children: ReactNode }) => {
     }, 100);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [running]);
 
   const startTimer = () => {
     setStartTime(Date.now());
@@ -71,8 +73,16 @@ export const TimerProvider = ({ children}: { children: ReactNode }) => {
     socket?.emit("stop-timer")
   }
 
+  const toggleTimer = () => {
+    if (running) {
+      stopTimer();
+    } else {
+      startTimer();
+    }
+  }
+
   return (
-    <TimerContext.Provider value={{ timer, startTimer, stopTimer, socket }}>
+    <TimerContext.Provider value={{ timer, startTimer, stopTimer, toggleTimer, socket, running }}>
       {children}
     </TimerContext.Provider>
   );

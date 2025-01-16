@@ -7,13 +7,7 @@ export const Topbar = () => {
       <h1> Pomoparty </h1>
 
       <div className='links'>
-        <NavLink to="/dashboard">
-          Dashboard
-        </NavLink>
-        <NavLink to="/create-party">
-          Create Party
-        </NavLink>
-        <NavLink to="/join-party">
+        <NavLink to="/join">
           Join Party
         </NavLink>
       </div>

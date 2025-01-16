@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.scss'
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { Navigate, RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { Dashboard } from './views/Dashboard/Dashboard';
 import { Join } from './views/Join/Join.tsx';
 import { Create } from './views/Create/Create.tsx';
@@ -15,15 +15,19 @@ const router = createBrowserRouter([
     // TODO: add errorElement
     children: [
       {
+        index: true,
+        element: <Navigate to="dashboard/" replace />,
+      },
+      {
         path: "dashboard/",
         element: <Dashboard />
       },
       {
-        path: "create-party/",
+        path: "party/",
         element: <Create />
       },
       {
-        path: "join-party/",
+        path: "join/",
         element: <Join />
       },
     ],
